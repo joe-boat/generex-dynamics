@@ -1,0 +1,230 @@
+Here are the precise changes you need to make to fix the splash screen dialog:
+
+## Change 1: Update the Email Dialog HTML (remove the skip option)
+
+**Find this section** (around line 650-680):
+```html
+<!-- Email Dialog -->
+<div class="email-dialog" id="emailDialog">
+    <div class="dialog-container">
+        <div class="dialog-icon">
+            <i class="fas fa-envelope-open-text"></i>
+        </div>
+        <h2 class="dialog-title">Welcome to Generex Dynamics</h2>
+        <p class="dialog-subtitle">Get exclusive updates and special offers</p>
+        <form class="dialog-form" id="emailForm">
+            <div class="form-group">
+                <input type="text" id="dialogName" placeholder="Your Name" required>
+            </div>
+            <div class="form-group">
+                <input type="email" id="dialogEmail" placeholder="Your Email Address" required>
+            </div>
+            <button type="submit" class="dialog-submit">
+                <i class="fas fa-paper-plane"></i> Subscribe & Continue
+            </button>
+            <div class="dialog-skip">
+                <a href="#" id="skipDialog">No thanks, I'll continue</a>
+            </div>
+        </form>
+    </div>
+</div>
+```
+
+**Replace with:**
+```html
+<!-- Email Dialog -->
+<div class="email-dialog" id="emailDialog">
+    <div class="dialog-container">
+        <div class="dialog-icon">
+            <i class="fas fa-envelope-open-text"></i>
+        </div>
+        <h2 class="dialog-title">Welcome to Generex Dynamics</h2>
+        <p class="dialog-subtitle">Please enter your email to continue</p>
+        <form class="dialog-form" id="emailForm">
+            <div class="form-group">
+                <input type="text" id="dialogName" placeholder="Your Name" required>
+            </div>
+            <div class="form-group">
+                <input type="email" id="dialogEmail" placeholder="Your Email Address" required>
+            </div>
+            <button type="submit" class="dialog-submit">
+                <i class="fas fa-paper-plane"></i> Subscribe & Continue
+            </button>
+        </form>
+    </div>
+</div>
+```
+
+## Change 2: Fix the JavaScript for email dialog submission
+
+**Find this section** (around line 1070-1150 in the script):
+```javascript
+// Handle email form submission - SEND TO BREVO
+    emailForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const name = document.getElementById('dialogName').value;
+        const email = document.getElementById('dialogEmail').value;
+        
+        if (name && email) {
+            const submitBtn = emailForm.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Subscribing...';
+            submitBtn.disabled = true;
+            
+           await fetch('/.netlify/functions/add-contact', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+        email: email,
+        name: name,
+        phone: ''
+    })
+});
+            
+            if (result.success) {
+                userEmail = email;
+                userName = name;
+                
+                // Store in localStorage
+                localStorage.setItem('userName', name);
+                localStorage.setItem('userEmail', email);
+                
+                
+                // Close dialog and show main content
+                emailDialog.classList.remove('active');
+                mainContent.classList.add('visible');
+                
+                // Show success message
+                const welcomeMsg = document.createElement('div');
+                welcomeMsg.style.position = 'fixed';
+                welcomeMsg.style.bottom = '20px';
+                welcomeMsg.style.right = '20px';
+                welcomeMsg.style.background = 'var(--gradient-gold)';
+                welcomeMsg.style.color = 'var(--dark-bg)';
+                welcomeMsg.style.padding = '1rem 1.5rem';
+                welcomeMsg.style.borderRadius = 'var(--border-radius)';
+                welcomeMsg.style.zIndex = '9999';
+                welcomeMsg.style.fontWeight = 'bold';
+                welcomeMsg.style.boxShadow = 'var(--shadow-gold)';
+                welcomeMsg.innerHTML = `Welcome ${name}! You're now subscribed to our updates. 🎉`;
+                document.body.appendChild(welcomeMsg);
+                setTimeout(() => welcomeMsg.remove(), 4000);
+            } else {
+                alert('There was an issue subscribing. Please try again or contact us directly.');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                return;
+            }
+            
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
+    });
+    
+    // Handle skip dialog
+    skipDialog.addEventListener('click', (e) => {
+        e.preventDefault();
+        emailDialog.classList.remove('active');
+        mainContent.classList.add('visible');
+        
+        // Still initialize Beehive with default or anonymous tracking
+        console.log('User skipped email signup');
+    });
+```
+
+**Replace with:**
+```javascript
+    // Handle email form submission - SEND TO BREVO (FIXED VERSION)
+    emailForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const name = document.getElementById('dialogName').value;
+        const email = document.getElementById('dialogEmail').value;
+        
+        if (name && email) {
+            const submitBtn = emailForm.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Subscribing...';
+            submitBtn.disabled = true;
+            
+            try {
+                const response = await fetch('/.netlify/functions/add-contact', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        name: name,
+                        phone: ''
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    userEmail = email;
+                    userName = name;
+                    
+                    // Store in localStorage
+                    localStorage.setItem('userName', name);
+                    localStorage.setItem('userEmail', email);
+                    
+                    // Close dialog and show main content
+                    emailDialog.classList.remove('active');
+                    mainContent.classList.add('visible');
+                    
+                    // Show success message
+                    const welcomeMsg = document.createElement('div');
+                    welcomeMsg.style.position = 'fixed';
+                    welcomeMsg.style.bottom = '20px';
+                    welcomeMsg.style.right = '20px';
+                    welcomeMsg.style.background = 'var(--gradient-gold)';
+                    welcomeMsg.style.color = 'var(--dark-bg)';
+                    welcomeMsg.style.padding = '1rem 1.5rem';
+                    welcomeMsg.style.borderRadius = 'var(--border-radius)';
+                    welcomeMsg.style.zIndex = '9999';
+                    welcomeMsg.style.fontWeight = 'bold';
+                    welcomeMsg.style.boxShadow = 'var(--shadow-gold)';
+                    welcomeMsg.innerHTML = `Welcome ${name}! You're now subscribed to our updates. 🎉`;
+                    document.body.appendChild(welcomeMsg);
+                    setTimeout(() => welcomeMsg.remove(), 4000);
+                } else {
+                    alert('There was an issue subscribing. Please try again or contact us directly.');
+                    console.error('API Error:', result.error);
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                    return;
+                }
+            } catch (error) {
+                console.error('Network Error:', error);
+                alert('Network error. Please check your connection and try again.');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                return;
+            }
+            
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
+    });
+    
+    // Remove skip dialog functionality - user MUST enter email
+    // The skipDialog element no longer exists in the HTML
+```
+
+## Summary of Changes:
+
+1. **Removed the skip link** from the dialog HTML - users can no longer bypass entering their email
+2. **Fixed the broken fetch call** - added proper `await` and `result` variable handling that was missing
+3. **Added proper error handling** for network issues
+4. **Removed the skip dialog event listener** since the skip link no longer exists
+
+The splash screen dialog will now:
+- Require users to enter their name AND email (no skip option)
+- Successfully send the data to Brevo via the same `/netlify/functions/add-contact` endpoint that the contact form uses
+- Show proper success/error messages
+- Only show main content after successful email submission

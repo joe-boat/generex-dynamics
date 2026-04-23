@@ -1493,7 +1493,7 @@
             <i class="fas fa-envelope-open-text"></i>
         </div>
         <h2 class="dialog-title">Welcome to Generex Dynamics</h2>
-        <p class="dialog-subtitle">Get exclusive updates and special offers</p>
+        <p class="dialog-subtitle">Please enter your email to continue</p>
         <form class="dialog-form" id="emailForm">
             <div class="form-group">
                 <input type="text" id="dialogName" placeholder="Your Name" required>
@@ -1504,9 +1504,6 @@
             <button type="submit" class="dialog-submit">
                 <i class="fas fa-paper-plane"></i> Subscribe & Continue
             </button>
-            <div class="dialog-skip">
-                <a href="#" id="skipDialog">No thanks, I'll continue</a>
-            </div>
         </form>
     </div>
 </div>
@@ -1924,7 +1921,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 500);
     }, 2500);
     
-       // Handle email form submission - SEND TO BREVO
+      // Handle email form submission - SEND TO BREVO (FIXED VERSION)
     emailForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
@@ -1937,48 +1934,58 @@ document.addEventListener('DOMContentLoaded', () => {
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Subscribing...';
             submitBtn.disabled = true;
             
-           await fetch('/.netlify/functions/add-contact', {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-        email: email,
-        name: name,
-        phone: ''
-    })
-});
-            
-            if (result.success) {
-                userEmail = email;
-                userName = name;
+            try {
+                const response = await fetch('/.netlify/functions/add-contact', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        name: name,
+                        phone: ''
+                    })
+                });
                 
-                // Store in localStorage
-                localStorage.setItem('userName', name);
-                localStorage.setItem('userEmail', email);
+                const result = await response.json();
                 
-                
-                // Close dialog and show main content
-                emailDialog.classList.remove('active');
-                mainContent.classList.add('visible');
-                
-                // Show success message
-                const welcomeMsg = document.createElement('div');
-                welcomeMsg.style.position = 'fixed';
-                welcomeMsg.style.bottom = '20px';
-                welcomeMsg.style.right = '20px';
-                welcomeMsg.style.background = 'var(--gradient-gold)';
-                welcomeMsg.style.color = 'var(--dark-bg)';
-                welcomeMsg.style.padding = '1rem 1.5rem';
-                welcomeMsg.style.borderRadius = 'var(--border-radius)';
-                welcomeMsg.style.zIndex = '9999';
-                welcomeMsg.style.fontWeight = 'bold';
-                welcomeMsg.style.boxShadow = 'var(--shadow-gold)';
-                welcomeMsg.innerHTML = `Welcome ${name}! You're now subscribed to our updates. 🎉`;
-                document.body.appendChild(welcomeMsg);
-                setTimeout(() => welcomeMsg.remove(), 4000);
-            } else {
-                alert('There was an issue subscribing. Please try again or contact us directly.');
+                if (result.success) {
+                    userEmail = email;
+                    userName = name;
+                    
+                    // Store in localStorage
+                    localStorage.setItem('userName', name);
+                    localStorage.setItem('userEmail', email);
+                    
+                    // Close dialog and show main content
+                    emailDialog.classList.remove('active');
+                    mainContent.classList.add('visible');
+                    
+                    // Show success message
+                    const welcomeMsg = document.createElement('div');
+                    welcomeMsg.style.position = 'fixed';
+                    welcomeMsg.style.bottom = '20px';
+                    welcomeMsg.style.right = '20px';
+                    welcomeMsg.style.background = 'var(--gradient-gold)';
+                    welcomeMsg.style.color = 'var(--dark-bg)';
+                    welcomeMsg.style.padding = '1rem 1.5rem';
+                    welcomeMsg.style.borderRadius = 'var(--border-radius)';
+                    welcomeMsg.style.zIndex = '9999';
+                    welcomeMsg.style.fontWeight = 'bold';
+                    welcomeMsg.style.boxShadow = 'var(--shadow-gold)';
+                    welcomeMsg.innerHTML = `Welcome ${name}! You're now subscribed to our updates. 🎉`;
+                    document.body.appendChild(welcomeMsg);
+                    setTimeout(() => welcomeMsg.remove(), 4000);
+                } else {
+                    alert('There was an issue subscribing. Please try again or contact us directly.');
+                    console.error('API Error:', result.error);
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                    return;
+                }
+            } catch (error) {
+                console.error('Network Error:', error);
+                alert('Network error. Please check your connection and try again.');
                 submitBtn.innerHTML = originalText;
                 submitBtn.disabled = false;
                 return;
@@ -1989,15 +1996,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
-    // Handle skip dialog
-    skipDialog.addEventListener('click', (e) => {
-        e.preventDefault();
-        emailDialog.classList.remove('active');
-        mainContent.classList.add('visible');
-        
-        // Still initialize Beehive with default or anonymous tracking
-        console.log('User skipped email signup');
-    });
+    // Remove skip dialog functionality - user MUST enter email
+    // The skipDialog element no longer exists in the HTML
     
     // Check if user already subscribed (optional)
     const savedEmail = localStorage.getItem('userEmail');
