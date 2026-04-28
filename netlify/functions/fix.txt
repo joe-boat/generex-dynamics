@@ -1,230 +1,173 @@
-Here are the precise changes you need to make to fix the splash screen dialog:
+**Here are the precise changes you need to make to fix the email gate issue:**
 
-## Change 1: Update the Email Dialog HTML (remove the skip option)
+### 1. Replace the entire **GATE SECTION** (the `#gate` div) with this updated version:
 
-**Find this section** (around line 650-680):
 ```html
-<!-- Email Dialog -->
-<div class="email-dialog" id="emailDialog">
-    <div class="dialog-container">
-        <div class="dialog-icon">
-            <i class="fas fa-envelope-open-text"></i>
-        </div>
-        <h2 class="dialog-title">Welcome to Generex Dynamics</h2>
-        <p class="dialog-subtitle">Get exclusive updates and special offers</p>
-        <form class="dialog-form" id="emailForm">
-            <div class="form-group">
-                <input type="text" id="dialogName" placeholder="Your Name" required>
-            </div>
-            <div class="form-group">
-                <input type="email" id="dialogEmail" placeholder="Your Email Address" required>
-            </div>
-            <button type="submit" class="dialog-submit">
-                <i class="fas fa-paper-plane"></i> Subscribe & Continue
-            </button>
-            <div class="dialog-skip">
-                <a href="#" id="skipDialog">No thanks, I'll continue</a>
-            </div>
-        </form>
+<!-- Email Gate - Updated with Skip option and better persistence -->
+<div id="gate">
+  <div class="gate-box">
+    <div class="gate-icon"><i class="fas fa-envelope-open-text"></i></div>
+    <h2 class="gate-title">Welcome to Generex Dynamics</h2>
+    <p class="gate-sub">Enter your details to access the full site and receive our weekly automation insights.</p>
+    <form class="gate-form" id="gateForm">
+      <input type="text" id="gateName" placeholder="Your full name" required>
+      <input type="email" id="gateEmail" placeholder="Your email address" required>
+      <button type="submit" class="btn btn-primary" style="justify-content:center;">
+        <i class="fas fa-arrow-right"></i> Continue to Site
+      </button>
+    </form>
+    
+    <!-- New Skip Option -->
+    <div style="text-align:center; margin-top: 1.25rem;">
+      <button onclick="skipGate()" 
+              style="background:none; border:none; color:var(--gray); font-size:0.85rem; cursor:pointer; text-decoration:underline;">
+        Skip for now → Continue without saving
+      </button>
     </div>
+  </div>
 </div>
 ```
 
-**Replace with:**
-```html
-<!-- Email Dialog -->
-<div class="email-dialog" id="emailDialog">
-    <div class="dialog-container">
-        <div class="dialog-icon">
-            <i class="fas fa-envelope-open-text"></i>
-        </div>
-        <h2 class="dialog-title">Welcome to Generex Dynamics</h2>
-        <p class="dialog-subtitle">Please enter your email to continue</p>
-        <form class="dialog-form" id="emailForm">
-            <div class="form-group">
-                <input type="text" id="dialogName" placeholder="Your Name" required>
-            </div>
-            <div class="form-group">
-                <input type="email" id="dialogEmail" placeholder="Your Email Address" required>
-            </div>
-            <button type="submit" class="dialog-submit">
-                <i class="fas fa-paper-plane"></i> Subscribe & Continue
-            </button>
-        </form>
-    </div>
-</div>
-```
+### 2. Replace the **GATE SCRIPT SECTION** (the part inside `<script>` that handles the gate) with this improved version:
 
-## Change 2: Fix the JavaScript for email dialog submission
+Find this block (around the end of the script):
 
-**Find this section** (around line 1070-1150 in the script):
-```javascript
-// Handle email form submission - SEND TO BREVO
-    emailForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const name = document.getElementById('dialogName').value;
-        const email = document.getElementById('dialogEmail').value;
-        
-        if (name && email) {
-            const submitBtn = emailForm.querySelector('button[type="submit"]');
-            const originalText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Subscribing...';
-            submitBtn.disabled = true;
-            
-           await fetch('/.netlify/functions/add-contact', {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-        email: email,
-        name: name,
-        phone: ''
-    })
+```js
+// ─── GATE ─────────────────────────────────────
+const savedEmail = localStorage.getItem('gd_email');
+const savedName = localStorage.getItem('gd_name');
+
+document.getElementById('gateForm')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const name = document.getElementById('gateName').value;
+  const email = document.getElementById('gateEmail').value;
+  const btn = e.target.querySelector('button[type="submit"]');
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+  btn.disabled = true;
+  try {
+    const res = await fetch('/.netlify/functions/add-contact', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, phone: '' })
+    });
+    const data = await res.json();
+    if (data.success) {
+      localStorage.setItem('gd_email', email);
+      localStorage.setItem('gd_name', name);
+    }
+  } catch {}
+  document.getElementById('gate').classList.remove('show');
+  showToast(`Welcome, ${name}! 🎉 You're now subscribed to our updates.`);
+  btn.innerHTML = '<i class="fas fa-arrow-right"></i> Continue to Site';
+  btn.disabled = false;
 });
-            
-            if (result.success) {
-                userEmail = email;
-                userName = name;
-                
-                // Store in localStorage
-                localStorage.setItem('userName', name);
-                localStorage.setItem('userEmail', email);
-                
-                
-                // Close dialog and show main content
-                emailDialog.classList.remove('active');
-                mainContent.classList.add('visible');
-                
-                // Show success message
-                const welcomeMsg = document.createElement('div');
-                welcomeMsg.style.position = 'fixed';
-                welcomeMsg.style.bottom = '20px';
-                welcomeMsg.style.right = '20px';
-                welcomeMsg.style.background = 'var(--gradient-gold)';
-                welcomeMsg.style.color = 'var(--dark-bg)';
-                welcomeMsg.style.padding = '1rem 1.5rem';
-                welcomeMsg.style.borderRadius = 'var(--border-radius)';
-                welcomeMsg.style.zIndex = '9999';
-                welcomeMsg.style.fontWeight = 'bold';
-                welcomeMsg.style.boxShadow = 'var(--shadow-gold)';
-                welcomeMsg.innerHTML = `Welcome ${name}! You're now subscribed to our updates. 🎉`;
-                document.body.appendChild(welcomeMsg);
-                setTimeout(() => welcomeMsg.remove(), 4000);
-            } else {
-                alert('There was an issue subscribing. Please try again or contact us directly.');
-                submitBtn.innerHTML = originalText;
-                submitBtn.disabled = false;
-                return;
-            }
-            
-            submitBtn.innerHTML = originalText;
-            submitBtn.disabled = false;
-        }
-    });
-    
-    // Handle skip dialog
-    skipDialog.addEventListener('click', (e) => {
-        e.preventDefault();
-        emailDialog.classList.remove('active');
-        mainContent.classList.add('visible');
-        
-        // Still initialize Beehive with default or anonymous tracking
-        console.log('User skipped email signup');
-    });
 ```
 
-**Replace with:**
-```javascript
-    // Handle email form submission - SEND TO BREVO (FIXED VERSION)
-    emailForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const name = document.getElementById('dialogName').value;
-        const email = document.getElementById('dialogEmail').value;
-        
-        if (name && email) {
-            const submitBtn = emailForm.querySelector('button[type="submit"]');
-            const originalText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Subscribing...';
-            submitBtn.disabled = true;
-            
-            try {
-                const response = await fetch('/.netlify/functions/add-contact', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        email: email,
-                        name: name,
-                        phone: ''
-                    })
-                });
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    userEmail = email;
-                    userName = name;
-                    
-                    // Store in localStorage
-                    localStorage.setItem('userName', name);
-                    localStorage.setItem('userEmail', email);
-                    
-                    // Close dialog and show main content
-                    emailDialog.classList.remove('active');
-                    mainContent.classList.add('visible');
-                    
-                    // Show success message
-                    const welcomeMsg = document.createElement('div');
-                    welcomeMsg.style.position = 'fixed';
-                    welcomeMsg.style.bottom = '20px';
-                    welcomeMsg.style.right = '20px';
-                    welcomeMsg.style.background = 'var(--gradient-gold)';
-                    welcomeMsg.style.color = 'var(--dark-bg)';
-                    welcomeMsg.style.padding = '1rem 1.5rem';
-                    welcomeMsg.style.borderRadius = 'var(--border-radius)';
-                    welcomeMsg.style.zIndex = '9999';
-                    welcomeMsg.style.fontWeight = 'bold';
-                    welcomeMsg.style.boxShadow = 'var(--shadow-gold)';
-                    welcomeMsg.innerHTML = `Welcome ${name}! You're now subscribed to our updates. 🎉`;
-                    document.body.appendChild(welcomeMsg);
-                    setTimeout(() => welcomeMsg.remove(), 4000);
-                } else {
-                    alert('There was an issue subscribing. Please try again or contact us directly.');
-                    console.error('API Error:', result.error);
-                    submitBtn.innerHTML = originalText;
-                    submitBtn.disabled = false;
-                    return;
-                }
-            } catch (error) {
-                console.error('Network Error:', error);
-                alert('Network error. Please check your connection and try again.');
-                submitBtn.innerHTML = originalText;
-                submitBtn.disabled = false;
-                return;
-            }
-            
-            submitBtn.innerHTML = originalText;
-            submitBtn.disabled = false;
-        }
+**Replace it with this:**
+
+```js
+// ─── GATE ─────────────────────────────────────
+function shouldShowGate() {
+  return !localStorage.getItem('gd_gate_skipped') && 
+         !localStorage.getItem('gd_email');
+}
+
+function skipGate() {
+  localStorage.setItem('gd_gate_skipped', 'true');
+  document.getElementById('gate').classList.remove('show');
+  showToast('Welcome! You can always subscribe later from the footer.');
+}
+
+document.getElementById('gateForm')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const name = document.getElementById('gateName').value.trim();
+  const email = document.getElementById('gateEmail').value.trim();
+  const btn = e.target.querySelector('button[type="submit"]');
+  
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+  btn.disabled = true;
+
+  try {
+    // Optional: still try to save to backend
+    await fetch('/.netlify/functions/add-contact', {
+      method: 'POST', 
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, phone: '' })
     });
     
-    // Remove skip dialog functionality - user MUST enter email
-    // The skipDialog element no longer exists in the HTML
+    localStorage.setItem('gd_email', email);
+    localStorage.setItem('gd_name', name);
+    localStorage.removeItem('gd_gate_skipped'); // clear skip if they later subscribe
+  } catch (err) {
+    console.log("Backend save failed, still allowing access");
+    localStorage.setItem('gd_email', email);
+    localStorage.setItem('gd_name', name);
+  }
+
+  document.getElementById('gate').classList.remove('show');
+  showToast(`Welcome, ${name.split(' ')[0]}! 🎉`);
+});
+
+// Updated DOMContentLoaded to respect skip
 ```
 
-## Summary of Changes:
+### 3. Update the **Splash + Gate Init** section (the `DOMContentLoaded` part):
 
-1. **Removed the skip link** from the dialog HTML - users can no longer bypass entering their email
-2. **Fixed the broken fetch call** - added proper `await` and `result` variable handling that was missing
-3. **Added proper error handling** for network issues
-4. **Removed the skip dialog event listener** since the skip link no longer exists
+Find this:
 
-The splash screen dialog will now:
-- Require users to enter their name AND email (no skip option)
-- Successfully send the data to Brevo via the same `/netlify/functions/add-contact` endpoint that the contact form uses
-- Show proper success/error messages
-- Only show main content after successful email submission
+```js
+// ─── SPLASH + GATE INIT ───────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  const splash = document.getElementById('splash');
+  const gate = document.getElementById('gate');
+  if (savedEmail && savedName) {
+    // Skip gate for returning users
+    setTimeout(() => {
+      splash.style.opacity = '0';
+      setTimeout(() => splash.style.display = 'none', 500);
+    }, 800);
+  } else {
+    setTimeout(() => {
+      splash.style.opacity = '0';
+      setTimeout(() => {
+        splash.style.display = 'none';
+        gate.classList.add('show');
+      }, 500);
+    }, 2500);
+  }
+});
+```
+
+**Replace it with:**
+
+```js
+// ─── SPLASH + GATE INIT ───────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  const splash = document.getElementById('splash');
+  const gate = document.getElementById('gate');
+
+  setTimeout(() => {
+    splash.style.opacity = '0';
+    setTimeout(() => {
+      splash.style.display = 'none';
+
+      // Show gate only if user never subscribed AND never skipped
+      if (shouldShowGate()) {
+        gate.classList.add('show');
+      }
+    }, 500);
+  }, 1800); // Slightly faster splash
+});
+```
+
+---
+
+**Summary of what these changes do:**
+
+- Users who previously entered their name/email **won’t see the gate again** (uses `localStorage`).
+- Users who click **"Skip for now"** also won’t see it again.
+- The gate only appears for completely new visitors.
+- Skip option is clearly visible and user-friendly.
+
+Just replace those three specific sections with the code above. No need to rewrite the whole file.
+
+Would you like me to also make the skip button look a bit nicer (styled version)?
