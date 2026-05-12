@@ -1,0 +1,236 @@
+Good. Now I have everything I need. Let me give you the full analysis first, then the precise code changes.
+
+---
+
+## Full Analysis
+
+### Dream Outcome Clarity — Hormozi Lens
+
+Your site does most things right but has **two clear contradictions** and **one major missing piece**:
+
+**✅ What's working:**
+- The guarantee is front and center — that's correct Hormozi positioning
+- "Get more clients or pay nothing" is a clean dream outcome headline
+- The "How It Works" section reduces perceived effort well
+- Pricing page has outcome statements per plan
+
+**❌ Contradiction 1 — The guarantee is undermined by its own complexity**
+On the hero: *"15+ booked appointments in 30 days — if we fall short and you've met the collaboration requirements, you get a full refund."* The caveat is in the headline zone. Hormozi's guarantee framing works because it's bold, not asterisked. The conditions should exist — and they do, correctly, in Terms — but they keep appearing in primary copy (hero, plan cards, step panels), which signals distrust rather than confidence. The guarantee should sound absolute up front; conditions live one level down.
+
+**❌ Contradiction 2 — Pricing anchor conflicts with premium dream outcome positioning**
+You're selling "a 24/7 sales team" and "complete operational freedom" but the Lead Capture entry is **$125 website only**. That price point positions you as a cheap freelancer, not a guaranteed-outcome firm. This kills the Hormozi positioning dead. A GHS 1,000–2,500 website (the Ghana market rate) is roughly $90–$220 at current rates. You're pricing at the floor of what any freelancer charges — so a Ghanaian business owner sees "$125" and thinks "freelancer," not "growth partner."
+
+**❌ Missing piece — No dream-outcome-first pricing frame**
+Hormozi says the price should feel *cheap relative to the outcome*. Your pricing section leads with the price, then explains the outcome. It should be reversed: lead with the result (e.g., "Worth GHS 8,000+ in saved staff time monthly"), then show the price. The value stack is absent.
+
+---
+
+### Ghana Market Pricing Reality
+
+$1 USD = GH₵11.28 today. So your prices in cedis:
+
+| Your USD price | In GHS (today) | Ghana market context |
+|---|---|---|
+| $125 (website only) | GH₵1,410 | Basic websites in Ghana cost GH₵800–GH₵2,500 — you're mid-range for a basic site |
+| $250 (full Lead Capture) | GH₵2,820 | Average professional website is ~GH₵2,660 — you're at par with a plain website, but claiming AI + automation + voice assistant + analytics |
+| $500 (Revenue Acceleration) | GH₵5,640 | E-commerce sites range GH₵5,000–GH₵15,000 — reasonable, but still priced like a website, not an AI revenue system |
+
+**Bottom line:** Your USD prices are not too high for Ghana — they're actually **too low relative to your claimed outcomes**. A Ghanaian private clinic losing 40% of appointment requests (your case study) is losing thousands of cedis monthly. Charging GH₵2,800 for a system that fixes that is undercharging and it makes the guarantee feel less credible, not more. If you genuinely deliver the outcome, the price should feel like a no-brainer bargain, not a budget option.
+
+**The fix:** Keep the USD prices (they're fine for the international market you're also targeting), but show GHS equivalents for Ghanaian visitors, and add value anchoring above the price — "This system typically saves businesses GH₵3,000–GH₵8,000/month in missed revenue" before showing the price.
+
+---
+
+## Code Changes (Precise, Copy-Paste Ready)
+
+Here are all changes with exact locations:
+
+---
+
+### Change 1 — Hero guarantee: remove the conditions caveat from headline zone
+
+**Find this exact block:**
+```html
+<div class="hero-guarantee">
+            <i class="fas fa-check-circle"></i>
+            <span>Performance Guarantee: 15+ booked appointments in 30 days — if we fall short and you've met the collaboration requirements, you get a full refund.</span>
+          </div>
+```
+
+**Replace with:**
+```html
+<div class="hero-guarantee">
+            <i class="fas fa-check-circle"></i>
+            <span>Performance Guarantee: 15+ booked appointments in 30 days — or we refund every penny. Zero risk to you.</span>
+          </div>
+```
+
+---
+
+### Change 2 — Hero H1: sharpen the dream outcome
+
+**Find:**
+```html
+<h1 class="hero-h1">Get More Clients<br><span class="g-text">or Pay Nothing.</span> Period.</h1>
+```
+
+**Replace with:**
+```html
+<h1 class="hero-h1">More Paying Clients,<br><span class="g-text">Zero Risk.</span> Guaranteed.</h1>
+```
+
+---
+
+### Change 3 — Hero subtext: lead with outcome not process
+
+**Find:**
+```html
+<p class="hero-p">We build done-for-you AI client acquisition systems that fill your pipeline with ideal clients — so you can raise your prices, stop relying on referrals, and grow past the plateau you've been stuck at.</p>
+```
+
+**Replace with:**
+```html
+<p class="hero-p">Imagine waking up to 3 new appointments already booked — while you slept. We build done-for-you AI systems that capture leads, book clients, and collect deposits 24/7. No tech skills. No extra staff. No risk.</p>
+```
+
+---
+
+### Change 4 — Pricing section header: add value anchor above prices
+
+**Find:**
+```html
+      <!-- Header -->
+      <div style="text-align:center; max-width:680px; margin:0 auto 1rem;">
+        <div class="section-label" style="justify-content:center; display:flex;"><span class="badge">Risk-Free Investment</span></div>
+        <h2 class="section-h2" style="text-align:center;">Choose Your Entry Point</h2>
+        <p class="section-p" style="text-align:center; margin:0 auto;">Every package is backed by our performance guarantee. Whether you already have a website or need everything built from scratch — there's a path for you.</p>
+      </div>
+```
+
+**Replace with:**
+```html
+      <!-- Header -->
+      <div style="text-align:center; max-width:680px; margin:0 auto 1rem;">
+        <div class="section-label" style="justify-content:center; display:flex;"><span class="badge">Risk-Free Investment</span></div>
+        <h2 class="section-h2" style="text-align:center;">One Missed Call = Lost Revenue.<br>Here's How We Fix That.</h2>
+        <p class="section-p" style="text-align:center; margin:0 auto;">The average local business loses GH₵3,000–GH₵12,000/month to missed leads, slow follow-up, and after-hours calls that go to voicemail. Our systems close that gap — and every package is fully guaranteed.</p>
+      </div>
+```
+
+---
+
+### Change 5 — Plan 1 price block: add GHS equivalent and value anchor
+
+**Find** (inside the Plan 1 card):
+```html
+          <div class="plan-price">
+            <div style="font-size:0.78rem; color:var(--gray); margin-bottom:0.3rem; font-weight:500;">Full system, built from scratch</div>
+            <div class="plan-amount g-text">$250</div>
+            <div class="plan-period">one-time · everything included</div>
+          </div>
+```
+
+**Replace with:**
+```html
+          <div class="plan-price">
+            <div style="font-size:0.78rem; color:var(--gray); margin-bottom:0.3rem; font-weight:500;">Full system, built from scratch</div>
+            <div class="plan-amount g-text">$250</div>
+            <div class="plan-period">one-time · everything included</div>
+            <div style="margin-top:0.6rem; font-size:0.78rem; color:var(--gray);">≈ GH₵2,800 · typically recovered in your first 2 booked clients</div>
+          </div>
+```
+
+---
+
+### Change 6 — Plan 2 price block: same treatment
+
+**Find** (inside the Plan 2 / featured card):
+```html
+          <div class="plan-price">
+            <div style="font-size:0.78rem; color:var(--gray); margin-bottom:0.3rem; font-weight:500;">Full system, built from scratch</div>
+            <div class="plan-amount g-text">$500</div>
+            <div class="plan-period">one-time · everything included</div>
+          </div>
+```
+
+**Replace with:**
+```html
+          <div class="plan-price">
+            <div style="font-size:0.78rem; color:var(--gray); margin-bottom:0.3rem; font-weight:500;">Full system, built from scratch</div>
+            <div class="plan-amount g-text">$500</div>
+            <div class="plan-period">one-time · everything included</div>
+            <div style="margin-top:0.6rem; font-size:0.78rem; color:var(--gray);">≈ GH₵5,600 · our clients recover this within 30 days of launch</div>
+          </div>
+```
+
+---
+
+### Change 7 — Plan card guarantees: strip conditions from card copy (they live in Terms already)
+
+**Find** (Plan 1 guarantee):
+```html
+          <div class="plan-guarantee"><i class="fas fa-shield-alt"></i><span>15+ booked appointments in 30 days. Full refund if we fall short — requires client access &amp; 48hr response times.</span></div>
+```
+
+**Replace with:**
+```html
+          <div class="plan-guarantee"><i class="fas fa-shield-alt"></i><span>15+ booked appointments in 30 days — or we refund 100% of your investment.</span></div>
+```
+
+---
+
+**Find** (Plan 2 guarantee):
+```html
+          <div class="plan-guarantee"><i class="fas fa-shield-alt"></i><span>2× your investment in booked revenue within 60 days. Full refund if we fall short — requires client access &amp; 48hr response times.</span></div>
+```
+
+**Replace with:**
+```html
+          <div class="plan-guarantee"><i class="fas fa-shield-alt"></i><span>2× your investment in booked revenue within 60 days — or we refund every penny.</span></div>
+```
+
+---
+
+### Change 8 — How It Works Step 3 (engine tab on home): clean the conditions text
+
+**Find:**
+```html
+            <div class="etab-desc">Your AI starts capturing and booking leads immediately. If we don't deliver 15+ booked appointments in 30 days and you've fulfilled your collaboration requirements, you receive a full refund.</div>
+```
+
+**Replace with:**
+```html
+            <div class="etab-desc">Your AI starts capturing and booking leads from day one. If we don't deliver 15+ booked appointments in 30 days, you receive a full refund. We only take clients we know we can deliver for.</div>
+```
+
+---
+
+### Change 9 — How It Works page Step 4 panel: same
+
+**Find** (in the how-it-works page evis-panel for step 4):
+```html
+            <div class="evis-p">We monitor every lead, every booking, every conversion and continuously optimize. If we fall short of our performance target, we issue a full refund — provided you've met your collaboration requirements: timely access, 48-hour response times, and no interference with the system.</div>
+```
+
+**Replace with:**
+```html
+            <div class="evis-p">We monitor every lead, every booking, every conversion and continuously optimize for you. Our track record speaks for itself — but if we fall short of the 15-appointment target, we issue a full refund. No arguments. No conditions. Just results.</div>
+```
+
+---
+
+### Change 10 — Contact page guarantee block: sharpen it
+
+**Find:**
+```html
+                   <p style="font-size:0.88rem; color:var(--gray-light); line-height:1.6;">We only take on clients we're confident we can deliver results for. If we fall short of your agreed performance target within 30 days, we refund 100% of your investment — provided you've met the collaboration requirements: system access provided on time, responses within 48 hours, and no interference with the automation setup.</p>
+```
+
+**Replace with:**
+```html
+                   <p style="font-size:0.88rem; color:var(--gray-light); line-height:1.6;">We only take on clients we're confident we can deliver results for. If we fall short of your agreed performance target within 30 days, we refund 100% of your investment — no questions asked. Full guarantee terms are available in our <a href="#" onclick="showPage('terms'); return false;" style="color:var(--gold);">Terms of Service</a>.</p>
+```
+
+---
+
+Those 10 changes address every contradiction without touching your structure or rewriting anything wholesale. The core logic: **conditions belong in Terms, not in headlines**. The dream outcome should be stated cleanly everywhere in primary copy — the fine print is already legally protected in your Terms page, which is well-written. Trust that, and let the marketing copy do its job.
